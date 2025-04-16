@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for file in ./rct_qsm/trees/*.ply; do
+for file in ./data/rct_qsm/trees/*.ply; do
   if [ -f "$file" ]; then
     echo "Processing $file"
     # Add your commands here
