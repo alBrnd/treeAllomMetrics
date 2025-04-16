@@ -5,15 +5,15 @@ rm trees/*_raycloud*
 #python convert_to_ply.py trees trees
 
 echo "Running rayimport..."
-bash batch_rayimport.sh
+bash code/batch_rayimport.sh
 
 echo "Running rayextract terrain..."
-bash batch_rayextract_terrain.sh
+bash code/batch_rayextract_terrain.sh
 
 echo "Running rayextract trees..."
-bash batch_rayextract_trees.sh
+bash code/batch_rayextract_trees.sh
 
 echo "Running batch_tree_info.sh"
-bash batch_tree_info.sh
+bash code/batch_tree_info.sh
 
 echo "All scripts have been executed!"
