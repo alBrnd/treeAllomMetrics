@@ -1,5 +1,5 @@
 #!/bin/bash
-rm trees/*_raycloud*
+rm data/rct_qsm/trees/*_raycloud*
 
 #echo "Running txt2ply.py on all trees in directory..."
 #python convert_to_ply.py trees trees
