@@ -23,21 +23,23 @@ source(file.path(path_to_src,"stem_taper_treels_function.R"))
 
 #######################################################################################
 # step 1: renaming files
-# (adapt according to new folder structure!)
 
-# rename point cloud files based on originalpclabel and newpointcloudname in database
+library(dplyr)
+
+# rename and copy point cloud files based on originalpclabel and newpointcloudname in database
+
+# path <- "path/to/data"
+path <- "//speedy12-37/data_15/_PROJEKTE/20250410_CRS_Allometries"
 
 # Read csv that contains info from database
 df <- read.csv("database_refdata.csv", stringsAsFactors = FALSE)
 
-# List of deliverers (adapt according to folder names)
-deliverers <- c("Abegg") #, "Krucek", "Terryn"
+dirs <- list.dirs(path, full.names = FALSE, recursive = FALSE)
 
-# Base directory where the folders are located
-base_dir <- getwd()
+deliverers <- unique(dirs)
 
 # Directory to save renamed files
-output_dir <- "./renamed_pointclouds/"
+output_dir <- file.path(path, "renamed_pointclouds")
 if (!dir.exists(output_dir)) {dir.create(output_dir)}
 
 # Function to search for a file recursively
@@ -54,13 +56,13 @@ find_file <- function(directory, filename) {
 for (deliverer in deliverers) {
   
   # Filter dataframe for the current deliverer
-  newdf <- df %>% filter(familyname == deliverer)
+  newdf <- df %>% filter(datapathpc == deliverer)
   
   # Loop through each row in the filtered dataframe
   for (i in 1:nrow(newdf)) {
     
     # Construct source folder name
-    sourcefolder <- file.path(base_dir, paste0(newdf$name[i], newdf$familyname[i]))
+    sourcefolder <- file.path(path, deliverer)
     
     # Search for the old file in source folder and subfolders
     old_file <- find_file(sourcefolder, newdf$originalpclabel[i])
@@ -81,7 +83,6 @@ for (deliverer in deliverers) {
     }
   }
 }
-
 
 #######################################################################################
 # step 2: filter and preprocess point clouds
