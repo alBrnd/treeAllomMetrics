@@ -1,6 +1,6 @@
 #!/bin/bash
 
-data_folder="./trees"
+data_folder="./rct_qsm/trees"
 
 for data_file in "$data_folder"/*_raycloud.ply; do
   # Extract the basename without '_raycloud.ply'
