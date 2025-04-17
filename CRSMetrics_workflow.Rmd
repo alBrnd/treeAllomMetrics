@@ -388,6 +388,7 @@ rct_metrics <- read.csv("RCT_QSM_metrics.csv", stringsAsFactors = FALSE)
 joined_df <- left_join(basic_metrics, stem_metrics, by="treeid")
 joined_df <- left_join(joined_df, rct_metrics, by="treeid")
 data_sorted = joined_df[ , c("treeid", names(joined_df)[names(joined_df) != "treeid"])] 
+joined_df[is.na(joined_df)] <- ""
 write.csv(data_sorted, file = "CRS_metrics.csv", row.names = FALSE)
 ```
 
