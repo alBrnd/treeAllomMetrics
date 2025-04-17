@@ -146,8 +146,8 @@ calculate_stem_volume <- function(file, outpath, slice_length = 0.2) {
   
   # Save results
   vol.results.table <- data.frame(treeid = treeid,
-                                  vol_stem.raw = seg.vol.raw, 
-                                  vol_stem.smooth = seg.vol.smooth, 
+                                  vol_stem_raw = seg.vol.raw, 
+                                  vol_stem_smooth = seg.vol.smooth, 
                                   DBH_splineTreeLS = DBH,
                                   D7_splineTreeLS = D7,
                                   pointFile = basename(file))
