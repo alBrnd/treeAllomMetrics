@@ -15,6 +15,7 @@ library(Rvcg)
 remove_small_clusters <- function(point_cloud, min_cluster_size = 10) {
   cluster_sizes <- table(point_cloud$cluster)
   valid_clusters <- names(cluster_sizes[cluster_sizes >= min_cluster_size])
+  rm(cluster_sizes)  # Remove unused variable
   return(point_cloud[point_cloud$cluster %in% valid_clusters, ])
 }
 
@@ -22,6 +23,7 @@ remove_small_clusters <- function(point_cloud, min_cluster_size = 10) {
 remove_distant_clusters <- function(point_cloud, max_distance = 5) {
   cluster_sizes <- table(point_cloud$cluster)
   largest_cluster <- names(which.max(cluster_sizes))
+  rm(cluster_sizes)  # Remove unused variable
   largest_cluster_points <- point_cloud[point_cloud$cluster == largest_cluster, ]
   
   # Compute distance of smaller clusters from the largest cluster
@@ -31,12 +33,14 @@ remove_distant_clusters <- function(point_cloud, max_distance = 5) {
     cluster_points <- point_cloud[point_cloud$cluster == cluster, ]
     largest_cluster_center <- colMeans(largest_cluster_points[, c("X", "Y", "Z")])
     mean_dist <- mean(VoxR::point_distance(cluster_points, largest_cluster_center))
+    rm(cluster_points, largest_cluster_center)  # Remove unused variables
     return(mean_dist)
   })
+  rm(largest_cluster_points)  # Remove unused variable
   
   # Keep only clusters within max_distance from the largest cluster
   valid_clusters <- names(cluster_distances[cluster_distances <= max_distance])
-  valid_clusters <- unique(point_cloud$cluster)[cluster_distances <= max_distance]
+  rm(cluster_distances)  # Remove unused variable
   return(point_cloud[point_cloud$cluster %in% valid_clusters, ])
 }
 
@@ -56,12 +60,12 @@ box_filter <- function(pointcloud) {
       abs(get(names(pointcloud)[2]) - median_y) <= 20 &
       abs(get(names(pointcloud)[3]) - median_z) <= 40
   ]
+  rm(median_x, median_y, median_z)  # Remove unused variables
   
   return(pointcloud)
 }
 
-
-# function to save point clouds as .ply
+# Function to save point clouds as .ply
 save_as_ply <- function(pointcloud, output_file) {
   
   # Extract XYZ
@@ -73,47 +77,52 @@ save_as_ply <- function(pointcloud, output_file) {
     it = matrix(numeric(0), nrow = 3),      # No faces = point cloud only
     material = list()
   )
+  rm(xyz)  # Remove unused variable
   class(vcg_obj) <- "mesh3d"
   
   # Write binary PLY
   Rvcg::vcgPlyWrite(vcg_obj, filename = output_file, binary = TRUE)
-  
-  #cat(sprintf("Converted %s to %s\n", input_file, output_file))
+  rm(vcg_obj)  # Remove unused variable
 }
-
-
 
 # Main processing function
 filter_by_cluster <- function(pcpath, outpath_ply, outpath_laz) {
   point_cloud <- ITSMe::read_tree_pc(path = pcpath)
   point_cloud <- data.table::data.table(X=point_cloud$X, Y=point_cloud$Y, Z=point_cloud$Z)
-  density_filtered <- VoxR::filter_point_density(point_cloud,0.02)
+  
+  density_filtered <- VoxR::filter_point_density(point_cloud, 0.02)
+  rm(point_cloud)  # Remove unused variable
+  
   sor_filtered_cloud <- VoxR::filter_noise(density_filtered, k=5, sigma=1.5, store_noise=FALSE)
+  rm(density_filtered)  # Remove unused variable
   
-  if(nrow(sor_filtered_cloud) > 100000){
+  if (nrow(sor_filtered_cloud) > 100000) {
     final_cloud <- box_filter(sor_filtered_cloud)  
-  }else{
-  
-  clustering <- VoxR::distance_clustering(sor_filtered_cloud, d_clust=2) # d_clust = The distance required to consider two points as being part of two different clusters
-  clust_filtered <- remove_small_clusters(clustering, min_cluster_size=5) # min_cluster_size= min number of points per cluster to keep it
-  final_cloud <- if (length(unique(clust_filtered$cluster)) > 1) remove_distant_clusters(clust_filtered, max_distance = 5) else clust_filtered
+  } else {
+    clustering <- VoxR::distance_clustering(sor_filtered_cloud, d_clust=2) 
+    rm(sor_filtered_cloud)  # Remove unused variable
+    clust_filtered <- remove_small_clusters(clustering, min_cluster_size=5)
+    rm(clustering)  # Remove unused variable
+    
+    final_cloud <- if (length(unique(clust_filtered$cluster)) > 1) 
+      remove_distant_clusters(clust_filtered, max_distance = 5) 
+    else 
+      clust_filtered
+    rm(clust_filtered)  # Remove unused variable
   }
   
-  # center point cloud by subtracting minimum coordinates
+  # Center point cloud by subtracting minimum coordinates
   min_coords <- apply(final_cloud, 2, min)
   centered_final_cloud <- sweep(final_cloud, 2, min_coords, FUN = "-")
+  rm(final_cloud, min_coords)  # Remove unused variables
   
-  # save filtered pointcloud as txt
-  #write.table(centered_final_cloud[,1:3], file = file.path(outpath, paste0(sub('\\..*$', '', basename(pcpath)), ".txt")), sep = " ", row.names = FALSE, col.names = FALSE)
-  
-  # save filtered point cloud as .ply
+  # Save filtered point cloud as .ply
   save_as_ply(centered_final_cloud, file.path(outpath_ply, paste0(sub('\\..*$', '', basename(pcpath)), "_filtered.ply")))
   
-  # save filtered pointcloud as laz
+  # Save filtered point cloud as .laz
   laspc <- lidR::LAS(centered_final_cloud[,1:3])
   lidR::writeLAS(laspc, file = file.path(outpath_laz, paste0(sub('\\..*$', '', basename(pcpath)), "_filtered.laz")))
-  
-  #return(final_cloud)
+  rm(centered_final_cloud, laspc)  # Remove unused variables
 }
 
 
@@ -122,14 +131,6 @@ filter_by_cluster <- function(pcpath, outpath_ply, outpath_laz) {
 
 
 
-# filepath <- "D:/STSMGent/data/ray/trees/Hajnowka_brz_44_m142.laz"
-# filepath <- "D:/STSMGent/data/Bialowieza_sw_71_testclusters2.las"
-# las <- lidR::readLAS(filepath)
-# xyz <- data.table::data.table(x=las@data$X, y=las@data$Y, z=las@data$Z)
-# #or:
-# pc <- ITSMe::read_tree_pc(path = filepath)
-# xyz <- data.table::data.table(x=pc$X, y=pc$Y, z=pc$Z)
-# 
-# pc_out <- filter_by_cluster(xyz) # or pc
+
 
 
