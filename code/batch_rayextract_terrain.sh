@@ -1,9 +1,18 @@
 #!/bin/bash
 
+
 for file in ./data/rct_qsm/trees/*_raycloud.ply; do
-  if [ -f "$file" ]; then
+  # Extract the basename without '.ply'
+  base_name=$(basename "$file" | sed 's/\.ply//')
+
+  # Check if the mesh file already exists
+  mesh_file="./data/rct_qsm/trees/${base_name}_mesh.ply"	
+
+  if [ ! -f "$mesh_file" ]; then
     echo "Processing $file"
-    # Add your commands here
     rayextract terrain "$file"
+  else
+    echo "File $mesh_file already exists. Skipping terrain."	
   fi
 done
+
