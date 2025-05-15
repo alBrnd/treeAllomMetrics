@@ -2,7 +2,7 @@
 # plot rayextract QSMs
 
 #library(png)
-#library(stringr)
+library(stringr)
 library(rgl)
 library(Rvcg)
 library(magick)
@@ -18,7 +18,21 @@ ply_grapher <- function(file_path, color, out_path) {
   #set wd to working figure folder
   if (!dir.exists(out_path)) dir.create(out_path, recursive = TRUE)
   #list obj files in input directory
-  files <- list.files(path = file_path, pattern = "raycloud_trees_mesh.ply", full.names = TRUE, recursive = FALSE)
+  #files <- list.files(path = file_path, pattern = "raycloud_trees_mesh.ply", full.names = TRUE, recursive = FALSE)
+  
+  infiles <- list.files(path = file_path, pattern = "raycloud_trees_mesh.ply", full.names = TRUE, recursive = FALSE)  
+  
+  # Existing filenames in outpath
+  existing_files <- list.files(out_path)
+  
+  # Input file base names without extension
+  input_basenames <- sub('\\..*$', '', basename(infiles))
+  
+  # Filter: keep only those not found in existing_files
+  files <- infiles[
+    !sapply(input_basenames, function(x) any(grepl(x, existing_files)))
+  ]
+  
   
   #loop through all .obj files in data directory and generate png prints, saved in input directory
   for (i in 1:length(files)){ #length(files)
