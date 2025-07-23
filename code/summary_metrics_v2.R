@@ -157,6 +157,7 @@ summary_basic_pointcloud_metrics_pertree <-
         )
     }
     tree$tree_height_m <- h <- h_out$h
+    print(paste0("tree height = ", as.character(h)))
     #calculate stem diameter
     if ("stem diameter" %in% metrics) {
       if (buttress) {
@@ -259,9 +260,9 @@ summary_basic_pointcloud_metrics_pertree <-
     }
     #perform crown classification
     if (("projected area" %in% metrics |
-         "alpha volume" %in% metrics) & crown) {
+         "alpha volume" %in% metrics) & crown == TRUE) {
       classify_out <- tryCatch({
-        classify_crown_pc(
+        res <- classify_crown_pc(
           pc = pc,
           thresholdbranch = thresholdbranch,
           minheight = minheight,
@@ -276,6 +277,8 @@ summary_basic_pointcloud_metrics_pertree <-
           plot = plot,
           plotcolors = plotcolors[c(4:5)]
         )
+        print("classified crown points")
+        res  # <-- return result!
       }, error = function(cond) {
         message(
           paste(
@@ -296,9 +299,11 @@ summary_basic_pointcloud_metrics_pertree <-
       })
       
       pc <- classify_out$crownpoints
-      if (plot == TRUE & "tree height" %in% metrics) {
-        hxz_plot <- classify_out$plotXZ + 
-          ggplot2::ggtitle(paste("H = ", as.character(round(h, 2)), " m", sep = ""))
+      #print(head(pc))
+      height_fig <- patchwork::wrap_elements(h_out$plotXZ | h_out$plotYZ) 
+      
+      if (crown ==TRUE & plot == TRUE & inherits(classify_out$plotXZ, "gg") & "tree height" %in% metrics) {
+        hxz_plot <- classify_out$plotXZ + ggplot2::ggtitle(paste("H = ", as.character(round(h, 2)), " m", sep = ""))
         hyz_plot <- classify_out$plotYZ
         height_fig <- patchwork::wrap_elements((hxz_plot | hyz_plot) + 
           patchwork::plot_layout(guides = 'collect') &
@@ -306,8 +311,7 @@ summary_basic_pointcloud_metrics_pertree <-
                          legend.key=ggplot2::element_blank()))
       }
     } else if (plot == TRUE & "tree height" %in% metrics) {
-      hxz_plot <- h_out$plotXZ + 
-        ggplot2::ggtitle(paste("H = ", as.character(round(h, 2)), " m", sep = ""))
+      hxz_plot <- h_out$plotXZ +  ggplot2::ggtitle(paste("H = ", as.character(round(h, 2)), " m", sep = ""))
       hyz_plot <- h_out$plotYZ
       height_fig <- patchwork::wrap_elements(hxz_plot | hyz_plot) 
     }

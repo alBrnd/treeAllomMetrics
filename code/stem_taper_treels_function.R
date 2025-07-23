@@ -170,7 +170,7 @@ calculate_stem_volume <- function(file, outpath, slice_length = 0.2) {
                                     vol_stem_raw = NA, 
                                     vol_stem_smooth = NA, 
                                     DBH_splineTreeLS = NA,
-                                    D7_splineTreeLS = D7,
+                                    D7_splineTreeLS = NA,
                                     pointFile = basename(file))
     csvname <- file.path(outpath, paste0("stemVolumes_circle_irls_", basename(file), ".csv"))
     write.csv(vol.results.table, csvname, row.names = FALSE)

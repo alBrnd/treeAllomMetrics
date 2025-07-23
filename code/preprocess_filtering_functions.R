@@ -86,7 +86,7 @@ save_as_ply <- function(pointcloud, output_file) {
 }
 
 # Main processing function
-filter_by_cluster <- function(pcpath, outpath_ply, outpath_laz) {
+filter_by_cluster <- function(pcpath, outpath_ply, outpath_laz, clusterfilter = TRUE) {
   point_cloud <- ITSMe::read_tree_pc(path = pcpath)
   point_cloud <- data.table::data.table(X=point_cloud$X, Y=point_cloud$Y, Z=point_cloud$Z)
   
@@ -96,7 +96,7 @@ filter_by_cluster <- function(pcpath, outpath_ply, outpath_laz) {
   sor_filtered_cloud <- VoxR::filter_noise(density_filtered, k=5, sigma=1.5, store_noise=FALSE)
   rm(density_filtered)  # Remove unused variable
   
-  if (nrow(sor_filtered_cloud) > 100000) {
+  if (nrow(sor_filtered_cloud) > 100000 | clusterfilter==FALSE) {
     final_cloud <- box_filter(sor_filtered_cloud)  
   } else {
     clustering <- VoxR::distance_clustering(sor_filtered_cloud, d_clust=2) 
@@ -131,6 +131,14 @@ filter_by_cluster <- function(pcpath, outpath_ply, outpath_laz) {
 
 
 
-
+# filepath <- "D:/STSMGent/data/ray/trees/Hajnowka_brz_44_m142.laz"
+# filepath <- "D:/STSMGent/data/Bialowieza_sw_71_testclusters2.las"
+# las <- lidR::readLAS(filepath)
+# xyz <- data.table::data.table(x=las@data$X, y=las@data$Y, z=las@data$Z)
+# #or:
+# pc <- ITSMe::read_tree_pc(path = filepath)
+# xyz <- data.table::data.table(x=pc$X, y=pc$Y, z=pc$Z)
+# 
+# pc_out <- filter_by_cluster(xyz) # or pc
 
 
