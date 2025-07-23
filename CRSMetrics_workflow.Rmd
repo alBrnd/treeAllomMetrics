@@ -14,7 +14,7 @@ Step 4 uses Raycloudtools which can be run via Docker or installed on Linux (or 
 
 ### Setup
 Install required packages if not already installed.
-```{r}
+```{r, message = FALSE}
 # install all required packages
 install.packages(c("data.table", "ITSMe", "doParallel", "foreach", "dplyr", "patchwork",  "VoxR", "lidR", "Rvcg", "rgl", "magick", "TreeLS"))
 ```
@@ -24,7 +24,7 @@ The working directory should contain this markdown document and two folders call
 *code* contains all the scripts and helper functions, while *data* contains all input point cloud files.
 The main results tables will appear in the working directory.
 
-```{r}
+```{r, message = FALSE}
 # set paths
 # main working directory
 wd_path <- "F:/CRS-Allometries-Datasets"
@@ -48,7 +48,7 @@ source(file.path(path_to_src,"stem_taper_treels_function.R"))
 
 **Only run this chunk if there are new files that are not yet renamed.**
 This part renames and copies point cloud files based on originalpclabel and newpointcloudname in the database.
-```{r}
+```{r, message = FALSE}
 # rename and copy point cloud files based on originalpclabel and newpointcloudname in database
 
 library(dplyr)
@@ -120,7 +120,7 @@ A file is skipped if its filtered point cloud already exists in the folder *rena
 
 This step uses parallel processing. As a default, it uses as many cores as possible but you can change the number of cores (nr_cores) to use.
 
-```{r}
+```{r, message = FALSE}
 library(foreach)
 library(doParallel)
 
@@ -184,7 +184,7 @@ This step can take a long time and might cause errors. In that case, just re-run
 
 **While this step is running you can already start with step 4.**
 
-```{r}
+```{r, message = FALSE}
 library(ITSMe)
 library(patchwork)
 library(foreach)
@@ -276,7 +276,7 @@ A file is skipped if its metrics already exist in the folder *renamed_pointcloud
 
 This step uses parallel processing. As a default, it uses as many cores as possible but you can change the number of cores (nr_cores) to use.
 
-```{r}
+```{r, message = FALSE}
 library(foreach)
 library(doParallel)
 
@@ -358,7 +358,7 @@ Once this has finished running, continue with step 5.
 
 ### Step 5: extract metrics from raycloud QSMs
 
-```{r}
+```{r, message = FALSE}
 data <- extract_rct_qsm_metrics(
   inpath = "./data/rct_qsm/trees",
   outpath = "./")
@@ -368,7 +368,7 @@ data <- extract_rct_qsm_metrics(
 ```
 
 optional: run this to plot all raycloud-QSMs
-```{r}
+```{r, message = FALSE}
 # optional: plot all QSMs
 library(rgl)
 library(Rvcg)
@@ -380,7 +380,7 @@ ply_grapher(file_path= "./data/rct_qsm/trees", color="#f6b251", out_path = "./da
 
 ### Step 6: merge all metrics into one dataframe
 
-```{r}
+```{r, message = FALSE}
 basic_metrics <- read.csv("summary_basic_metrics.csv", stringsAsFactors = FALSE)
 stem_metrics <- read.csv("stem_dia_vol_metrics.csv", stringsAsFactors = FALSE)
 rct_metrics <- read.csv("RCT_QSM_metrics.csv", stringsAsFactors = FALSE)
